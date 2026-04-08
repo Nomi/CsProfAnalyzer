@@ -1,3 +1,5 @@
+"""Application configuration module."""
+
 import json
 import os
 from types import MappingProxyType
@@ -7,9 +9,6 @@ from typing import Dict, Any, Final
 class AppConfig:
     """Read-only configuration loaded from JSON with schema validation."""
 
-    _data: Final[Dict[str, Any]]
-
-    # Schema definition for validation
     SCHEMA = {
         "PERCENTILE_MAP": dict,
         "STUTTER_THRESHOLD_MS": (int, float),
@@ -21,16 +20,16 @@ class AppConfig:
         "COL_SERVER_MS": str,
     }
 
-    def __init__(self, config_path: str = "config.json"):
+    def __init__(self, config_path: str = "config.json") -> None:
         if not os.path.exists(config_path):
             raise FileNotFoundError(f"Config file not found: {config_path}")
 
-        with open(config_path, "r") as f:
-            data = json.load(f)
+        with open(config_path, "r", encoding="utf-8") as file:
+            data = json.load(file)
             self._validate(data)
-            self._data = data
+            self._data: Final[Dict[str, Any]] = data
 
-    def _validate(self, data: Dict[str, Any]):
+    def _validate(self, data: Dict[str, Any]) -> None:
         for key, expected_type in self.SCHEMA.items():
             if key not in data:
                 raise ValueError(f"Missing config key: {key}")
@@ -40,37 +39,45 @@ class AppConfig:
                 )
 
     @property
-    def PERCENTILE_MAP(self) -> MappingProxyType:
+    def percentile_map(self) -> MappingProxyType:
+        """Returns the percentile map."""
         return MappingProxyType(
             {float(k): v for k, v in self._data["PERCENTILE_MAP"].items()}
         )
 
     @property
-    def STUTTER_THRESHOLD_MS(self) -> float:
+    def stutter_threshold_ms(self) -> float:
+        """Returns the stutter threshold in milliseconds."""
         return float(self._data["STUTTER_THRESHOLD_MS"])
 
     @property
-    def COL_TIME(self) -> str:
+    def col_time(self) -> str:
+        """Returns the time column name."""
         return str(self._data["COL_TIME"])
 
     @property
-    def COL_FRAME_FPS(self) -> str:
+    def col_frame_fps(self) -> str:
+        """Returns the frame FPS column name."""
         return str(self._data["COL_FRAME_FPS"])
 
     @property
-    def COL_SMOOTH_FPS(self) -> str:
+    def col_smooth_fps(self) -> str:
+        """Returns the smooth FPS column name."""
         return str(self._data["COL_SMOOTH_FPS"])
 
     @property
-    def COL_FRAME_MS(self) -> str:
+    def col_frame_ms(self) -> str:
+        """Returns the frame MS column name."""
         return str(self._data["COL_FRAME_MS"])
 
     @property
-    def COL_SMOOTH_MS(self) -> str:
+    def col_smooth_ms(self) -> str:
+        """Returns the smooth MS column name."""
         return str(self._data["COL_SMOOTH_MS"])
 
     @property
-    def COL_SERVER_MS(self) -> str:
+    def col_server_ms(self) -> str:
+        """Returns the server frame MS column name."""
         return str(self._data["COL_SERVER_MS"])
 
 
