@@ -1,0 +1,15 @@
+{
+    "PERCENTILE_MAP": {
+        "0.5": "Median",
+        "0.1": "10%",
+        "0.01": "1%",
+        "0.001": "0.1%"
+    },
+    "STUTTER_THRESHOLD_MS": 50.0,
+    "COL_TIME": "Time",
+    "COL_FRAME_FPS": "Frame FPS",
+    "COL_SMOOTH_FPS": "Smooth FPS",
+    "COL_FRAME_MS": "Frame MS",
+    "COL_SMOOTH_MS": "Smooth MS",
+    "COL_SERVER_MS": "Server Frame MS"
+}
