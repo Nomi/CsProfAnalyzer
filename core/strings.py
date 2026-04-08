@@ -3,6 +3,15 @@ import os
 from types import MappingProxyType
 from typing import Final
 
+# ANSI Colors for terminal output
+C_CYAN: Final = "\033[96m"
+C_YELLOW: Final = "\033[93m"
+C_GREEN: Final = "\033[92m"
+C_RED: Final = "\033[91m"
+C_MAGENTA: Final = "\033[95m"
+C_BOLD: Final = "\033[1m"
+C_RESET: Final = "\033[0m"
+
 class Strings:
     """Immutable UI strings loaded from locale-specific JSON."""
     _data: Final[dict]
