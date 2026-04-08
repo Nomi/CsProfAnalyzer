@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: pip install pylint pandas numpy tqdm colorama
       - name: Run Pylint
-        run: python -m pylint core/*.py CsProfAnalyzer.py
+        run: python -m pylint core/*.py cs_prof_analyzer.py
 
   build:
     needs: [validate-version, lint]
@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: pip install pandas numpy tqdm colorama pyinstaller
       - name: Build executable
-        run: pyinstaller --onefile --name CsProfAnalyzer CsProfAnalyzer.py
+        run: pyinstaller --onefile --name CsProfAnalyzer cs_prof_analyzer.py
       - name: Get Version
         id: get_version
         shell: python

@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 import pandas as pd
 from tqdm import tqdm
 from colorama import Fore, Style
-from .strings import STRINGS as STR, C_GREEN, C_RESET
+from .strings import STRINGS, C_GREEN, C_RESET
 from .config import CFG
 
 
@@ -79,11 +79,15 @@ class CS2Analyzer:
         ]
 
         print(STRINGS.MSG_ANALYZING)
-        for col, rev in tqdm(tasks, bar_format="{l_bar}%s{bar}%s{r_bar}" % (C_GREEN, C_RESET)):
+        for col, rev in tqdm(
+            tasks, bar_format="{l_bar}%s{bar}%s{r_bar}" % (C_GREEN, C_RESET)
+        ):
             time.sleep(0.05)
             self.results[col] = self._calculate_metrics(self.df[col], reverse=rev)
 
-        self.duration = float(self.df[CFG.col_time].iloc[-1] - self.df[CFG.col_time].iloc[0])
+        self.duration = float(
+            self.df[CFG.col_time].iloc[-1] - self.df[CFG.col_time].iloc[0]
+        )
         self.server_diff = float(
             (self.df[CFG.col_server_ms] - self.df[CFG.col_frame_ms]).mean()
         )
@@ -117,8 +121,11 @@ class CS2Analyzer:
         stutter_color = Fore.RED if self.stutter_count > 0 else Fore.GREEN
         print(f"\n{cya}[{STRINGS.SECTION_ENGINE}]{rst}")
         print(f"  {Fore.WHITE}{STRINGS.LBL_SERVER:20}: {self.server_diff:.2f} {STRINGS.UNIT_MS}")
-        stutter_lbl = STRINGS.LBL_STUTTER.format(threshold=CFG.stutter_threshold_ms)
+        stutter_lbl = STRINGS.LBL_STUTTER.format(
+            threshold=CFG.stutter_threshold_ms
+        )
         print(
-            f"  {stutter_color}{stutter_lbl:20}: {self.stutter_count} ({self.stutter_rate:.2f}%){rst}"
+            f"  {stutter_color}{stutter_lbl:20}: "
+            f"{self.stutter_count} ({self.stutter_rate:.2f}%){rst}"
         )
         print(f"{mag}{STRINGS.SECTION_LINE}{rst}\n")
