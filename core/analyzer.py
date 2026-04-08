@@ -1,7 +1,7 @@
 import sys
 import time
 from typing import Dict, Any, Optional
-from .strings import STRINGS as STR
+from .strings import STRINGS as STR, C_CYAN, C_GREEN, C_RED, C_RESET, C_BOLD
 from .config import CFG
 
 class CS2Analyzer:
@@ -54,7 +54,7 @@ class CS2Analyzer:
                  (CFG.COL_FRAME_MS, False), (CFG.COL_SMOOTH_MS, False)]
 
         print(STR.MSG_ANALYZING)
-        for col, rev in tqdm(tasks, bar_format="{l_bar}{bar}{r_bar}"):
+        for col, rev in tqdm(tasks, bar_format="{l_bar}%s{bar}%s{r_bar}" % (C_GREEN, C_RESET)):
             time.sleep(0.05) 
             self.results[col] = self._calculate_metrics(self.df[col], reverse=rev)
 
@@ -65,18 +65,26 @@ class CS2Analyzer:
 
     def display_report(self) -> None:
         from colorama import Fore, Style
-        print(f"\n{Style.BRIGHT}{STR.SECTION_LINE}")
-        print(f"{Style.BRIGHT}{STR.SECTION_TITLE.format(duration=self.duration)}")
-        print(f"{Style.BRIGHT}{STR.SECTION_LINE}{Style.RESET_ALL}")
+        mag = Fore.MAGENTA + Style.BRIGHT
+        cya = Fore.CYAN + Style.BRIGHT
+        rst = Style.RESET_ALL
+        print(f"\n{mag}{STR.SECTION_LINE}")
+        print(f"{mag}{STR.SECTION_TITLE.format(duration=self.duration)}")
+        print(f"{mag}{STR.SECTION_LINE}{rst}")
 
         for category, metrics in self.results.items():
-            print(f"\n{Style.BRIGHT}[{category}]{Style.RESET_ALL}")
+            print(f"\n{cya}[{category}]{rst}")
             unit = STR.UNIT_MS if "MS" in category else STR.UNIT_FPS
             for label, val in metrics.items():
-                print(f"  {label:20}: {val:8.2f} {unit}")
+                color = Fore.WHITE
+                if label in (STR.LBL_MEAN, STR.LBL_MEDIAN): color = Fore.GREEN
+                elif STR.SUFFIX_LOW in label or STR.SUFFIX_HIGH in label: color = Fore.YELLOW
+                elif label == STR.LBL_JITTER: color = Fore.RED if val > 10 else Fore.GREEN
+                print(f"  {color}{label:20}: {val:8.2f} {unit}{rst}")
 
-        print(f"\n{Style.BRIGHT}[{STR.SECTION_ENGINE}]{Style.RESET_ALL}")
-        print(f"  {STR.LBL_SERVER:20}: {self.server_diff:.2f} {STR.UNIT_MS}")
+        stutter_color = Fore.RED if self.stutter_count > 0 else Fore.GREEN
+        print(f"\n{cya}[{STR.SECTION_ENGINE}]{rst}")
+        print(f"  {Fore.WHITE}{STR.LBL_SERVER:20}: {self.server_diff:.2f} {STR.UNIT_MS}")
         stutter_lbl = STR.LBL_STUTTER.format(threshold=CFG.STUTTER_THRESHOLD_MS)
-        print(f"  {stutter_lbl:20}: {self.stutter_count} ({self.stutter_rate:.2f}%)")
-        print(f"{Style.BRIGHT}{STR.SECTION_LINE}{Style.RESET_ALL}\n")
+        print(f"  {stutter_color}{stutter_lbl:20}: {self.stutter_count} ({self.stutter_rate:.2f}%){rst}")
+        print(f"{mag}{STR.SECTION_LINE}{rst}\n")
