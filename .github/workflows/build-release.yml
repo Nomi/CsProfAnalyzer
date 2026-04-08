@@ -37,8 +37,8 @@ jobs:
           python-version: '3.10'
       - name: Install dependencies
         run: pip install pylint pandas numpy tqdm colorama
-      - name: Run Pylint
-        run: python -m pylint core/*.py cs_prof_analyzer.py
+      - name: Run Tests
+        run: python -m unittest discover tests
 
   build:
     needs: [validate-version, lint]
