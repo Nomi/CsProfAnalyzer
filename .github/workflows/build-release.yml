@@ -54,12 +54,11 @@ jobs:
         run: pyinstaller --onefile --name CsProfAnalyzer cs_prof_analyzer.py
       - name: Get Version
         id: get_version
-        shell: python
+        shell: bash
         run: |
-          import os
-          with open('core/__version__.py') as f:
-            version = f.read().split('"')[1]
-            print(f"version={version}", file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+          # Import version from python, extract and export to GITHUB_OUTPUT
+          version=$(python -c "import core.__version__; print(core.__version__.__version__)")
+          echo "version=$version" >> $GITHUB_OUTPUT
       - name: Create Tag
         run: |
           git config user.name "github-actions"
