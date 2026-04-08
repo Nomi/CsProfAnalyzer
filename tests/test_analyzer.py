@@ -2,9 +2,9 @@
 
 import unittest
 import os
-import json
 from core.analyzer import CS2Analyzer
 from core.config import AppConfig
+
 
 class TestPerformanceAnalyzer(unittest.TestCase):
     """Test suite for performance analysis."""
@@ -12,7 +12,7 @@ class TestPerformanceAnalyzer(unittest.TestCase):
     def setUp(self):
         self.config_path = "config.json"
         self.analyzer = CS2Analyzer("test_data.csv")
-        
+
         # Create a dummy CSV file
         with open("test_data.csv", "w", encoding="utf-8") as f:
             f.write("Time,Frame FPS,Smooth FPS,Frame MS,Smooth MS,Server Frame MS\n")
@@ -33,6 +33,7 @@ class TestPerformanceAnalyzer(unittest.TestCase):
         """Test that configuration loads correctly."""
         config = AppConfig(self.config_path)
         self.assertIsInstance(config.stutter_threshold_ms, float)
+
 
 if __name__ == "__main__":
     unittest.main()
