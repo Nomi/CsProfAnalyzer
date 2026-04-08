@@ -7,6 +7,8 @@ on:
 
 jobs:
   validate-version:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     outputs:
       version_changed: ${{ steps.check.outputs.version_changed }}
