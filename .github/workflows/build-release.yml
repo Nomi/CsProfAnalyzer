@@ -57,7 +57,7 @@ jobs:
       - name: Install dependencies
         run: pip install pandas numpy tqdm colorama pyinstaller
       - name: Build executable
-        run: pyinstaller --onefile --name CsProfAnalyzer cs_prof_analyzer.py
+        run: pyinstaller --onefile --name CsProfAnalyzer --add-data "core/locale;core/locale" cs_prof_analyzer.py
       - name: Get Version
         id: get_version
         shell: bash
