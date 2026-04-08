@@ -21,6 +21,7 @@ class TestPerformanceAnalyzer(unittest.TestCase):
     def tearDown(self):
         if os.path.exists("test_data.csv"):
             os.remove("test_data.csv")
+
     def test_load_data(self):
         """Test data loading functionality."""
         self.analyzer.load_data()
