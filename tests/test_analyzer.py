@@ -2,7 +2,6 @@
 
 import unittest
 import os
-import json
 from core.analyzer import CS2Analyzer
 from core.config import AppConfig
 
