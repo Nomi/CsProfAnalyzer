@@ -12,17 +12,23 @@ C_MAGENTA: Final = "\033[95m"
 C_BOLD: Final = "\033[1m"
 C_RESET: Final = "\033[0m"
 
+
 class Strings:
     """Immutable UI strings loaded from locale-specific JSON."""
+
     _data: Final[dict]
 
     def __init__(self, locale: str = "en-us"):
-        strings_path = os.path.join(os.path.dirname(__file__), "locale", locale, "strings.json")
-        
+        strings_path = os.path.join(
+            os.path.dirname(__file__), "locale", locale, "strings.json"
+        )
+
         if not os.path.exists(strings_path):
-            raise FileNotFoundError(f"UI strings file for {locale} not found at: {strings_path}")
-        
-        with open(strings_path, 'r') as f:
+            raise FileNotFoundError(
+                f"UI strings file for {locale} not found at: {strings_path}"
+            )
+
+        with open(strings_path, "r") as f:
             self._data = json.load(f)
 
     def __getattr__(self, name: str) -> str:
@@ -37,5 +43,6 @@ class Strings:
     @property
     def HELP_EPILOG(self) -> str:
         return str(self._data["HELP_EPILOG"])
+
 
 STRINGS = Strings()
