@@ -10,6 +10,10 @@ on:
         description: 'Skip version validation'
         required: false
         default: 'false'
+      release_notes:
+        description: 'Additional notes for the release'
+        required: false
+        default: ''
 
 jobs:
   validate-version:
@@ -44,6 +48,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -56,9 +62,22 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          # Import version from python, extract and export to GITHUB_OUTPUT
           version=$(python -c "import core.__version__; print(core.__version__.__version__)")
           echo "version=$version" >> $GITHUB_OUTPUT
+      - name: Generate Changelog
+        id: changelog
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            echo "Manual release." >> $GITHUB_OUTPUT
+            echo "${{ github.event.inputs.release_notes }}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            git log -1 --pretty=format:"%s%n%b" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
       - name: Create Tag
         run: |
           git config user.name "github-actions"
@@ -69,5 +88,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
+          body: ${{ steps.changelog.outputs.body }}
           files: |
             dist/CsProfAnalyzer.exe
