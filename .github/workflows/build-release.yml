@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+    inputs:
+      skip_validation:
+        description: 'Skip version validation'
+        required: false
+        default: 'false'
 
 jobs:
   validate-version:
@@ -44,7 +50,7 @@ jobs:
 
   build:
     needs: [validate-version, lint]
-    if: needs.validate-version.outputs.version_changed == 'true'
+    if: github.event_name == 'workflow_dispatch' || needs.validate-version.outputs.version_changed == 'true'
     runs-on: windows-latest
     permissions:
       contents: write
