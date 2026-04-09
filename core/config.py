@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 from types import MappingProxyType
 from typing import Dict, Any, Final
 
@@ -21,10 +22,14 @@ class AppConfig:
     }
 
     def __init__(self, config_path: str = "config.json") -> None:
-        if not os.path.exists(config_path):
-            raise FileNotFoundError(f"Config file not found: {config_path}")
+        # Determine base path for asset resolution
+        base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        full_config_path = os.path.join(base_path, config_path)
+        
+        if not os.path.exists(full_config_path):
+            raise FileNotFoundError(f"Config file not found: {full_config_path}")
 
-        with open(config_path, "r", encoding="utf-8") as file:
+        with open(full_config_path, "r", encoding="utf-8") as file:
             data = json.load(file)
             self._validate(data)
             self._data: Final[Dict[str, Any]] = data

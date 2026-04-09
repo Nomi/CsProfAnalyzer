@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 from types import MappingProxyType
 from typing import Final
 
@@ -10,9 +11,9 @@ class Strings:
     """Immutable UI strings loaded from locale-specific JSON."""
 
     def __init__(self, locale: str = "en-us") -> None:
-        strings_path = os.path.join(
-            os.path.dirname(__file__), "locale", locale, "strings.json"
-        )
+        # PyInstaller puts files in _MEIPASS; standard execution uses __file__
+        base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+        strings_path = os.path.join(base_path, "locale", locale, "strings.json")
 
         if not os.path.exists(strings_path):
             raise FileNotFoundError(
