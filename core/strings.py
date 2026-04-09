@@ -11,14 +11,24 @@ class Strings:
     """Immutable UI strings loaded from locale-specific JSON."""
 
     def __init__(self, locale: str = "en-us") -> None:
-        # PyInstaller puts files in _MEIPASS; standard execution uses __file__
-        base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        # Resolve the directory where this script (strings.py) is located
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # PyInstaller uses _MEIPASS; script execution looks in the directory of this file
+        base_path = getattr(sys, "_MEIPASS", os.path.dirname(script_dir))
+        
+        # Adjust path: the locale folder is at the project root level
         strings_path = os.path.join(base_path, "locale", locale, "strings.json")
 
         if not os.path.exists(strings_path):
-            raise FileNotFoundError(
-                f"UI strings file for {locale} not found at: {strings_path}"
-            )
+            # Fallback for development if the structure is different
+            fallback_path = os.path.join(script_dir, "..", "locale", locale, "strings.json")
+            if os.path.exists(fallback_path):
+                strings_path = fallback_path
+            else:
+                raise FileNotFoundError(
+                    f"UI strings file for {locale} not found at: {strings_path} or {fallback_path}"
+                )
 
         with open(strings_path, "r", encoding="utf-8") as file:
             self._data: Final[dict] = json.load(file)
