@@ -11,16 +11,16 @@ class Strings:
     """Immutable UI strings loaded from locale-specific JSON."""
 
     def __init__(self, locale: str = "en-us") -> None:
-        # Get the directory of strings.py (e.g., .../CsProfAnalyzer/core)
+        # Determine the directory where this script (strings.py) is located
         core_dir = os.path.dirname(os.path.abspath(__file__))
-        
+
         # PyInstaller bundled location
-        if hasattr(sys, "_MEIPASS"):
+        if getattr(sys, "frozen", False):
             base_path = sys._MEIPASS
-            # With --add-data "core/locale;locale", PyInstaller puts core/locale at locale/
+            # PyInstaller puts `core/locale` at `locale/` in the bundle root
             strings_path = os.path.join(base_path, "locale", locale, "strings.json")
         else:
-            # Script execution location: .../CsProfAnalyzer/core/locale/en-us/strings.json
+            # Script execution: strings.py is in 'core/', locale is in 'core/locale/'
             strings_path = os.path.join(core_dir, "locale", locale, "strings.json")
 
         if not os.path.exists(strings_path):
