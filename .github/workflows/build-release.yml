@@ -10,6 +10,10 @@ on:
         description: 'Skip version validation'
         required: false
         default: 'false'
+      force_overwrite:
+        description: 'Overwrite existing tag/release'
+        required: false
+        default: 'false'
       release_notes:
         description: 'Additional notes for the release'
         required: false
@@ -28,16 +32,20 @@ jobs:
           fetch-depth: 2
       - id: check
         run: |
-          IGNORE_PATTERN='^(.*\.md|\.gitignore|\.github\/.*)$'
-          if git diff --name-only HEAD^ HEAD | grep -qvE "$IGNORE_PATTERN"; then
-            if git diff HEAD^ HEAD core/__version__.py | grep -q '^\+__version__ ='; then
-              echo "version_changed=true" >> $GITHUB_OUTPUT
-            else
-              echo "Error: core/__version__.py must be updated when code changes occur."
-              exit 1
-            fi
+          if [ "${{ github.event.inputs.skip_validation }}" == "true" ]; then
+            echo "version_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "version_changed=false" >> $GITHUB_OUTPUT
+            IGNORE_PATTERN='^(.*\.md|\.gitignore|\.github\/.*)$'
+            if git diff --name-only HEAD^ HEAD | grep -qvE "$IGNORE_PATTERN"; then
+              if git diff HEAD^ HEAD core/__version__.py | grep -q '^\+__version__ ='; then
+                echo "version_changed=true" >> $GITHUB_OUTPUT
+              else
+                echo "Error: core/__version__.py must be updated when code changes occur."
+                exit 1
+              fi
+            else
+              echo "version_changed=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
   build-and-release:
@@ -70,7 +78,7 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "body<<EOF" >> $GITHUB_OUTPUT
-            echo "Manual release." >> $GITHUB_OUTPUT
+            echo "Manually triggered release." >> $GITHUB_OUTPUT
             echo "${{ github.event.inputs.release_notes }}" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           else
@@ -82,12 +90,20 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git tag v${{ steps.get_version.outputs.version }}
-          git push origin v${{ steps.get_version.outputs.version }}
+          TAG=v${{ steps.get_version.outputs.version }}
+          if [ "${{ github.event.inputs.force_overwrite }}" == "true" ]; then
+            git tag -d $TAG || true
+            git push --delete origin $TAG || true
+          fi
+          git tag $TAG
+          git push origin $TAG
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           body: ${{ steps.changelog.outputs.body }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
           files: |
             dist/CsProfAnalyzer.exe
