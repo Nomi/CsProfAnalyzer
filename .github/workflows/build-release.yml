@@ -79,18 +79,14 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            {
-              echo "body<<EOF"
-              echo "Manually triggered release."
-              echo "${{ github.event.inputs.release_notes }}"
-              echo "EOF"
-            } >> $GITHUB_OUTPUT
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            echo "Manually triggered release." >> $GITHUB_OUTPUT
+            echo "${{ github.event.inputs.release_notes }}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
           else
-            {
-              echo "body<<EOF"
-              git log -1 --pretty=format:"%s%n%b"
-              echo "EOF"
-            } >> $GITHUB_OUTPUT
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            git log -1 --pretty=format:"%s%n%b" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
           fi
       - name: Create Tag
         shell: bash
