@@ -11,24 +11,22 @@ class Strings:
     """Immutable UI strings loaded from locale-specific JSON."""
 
     def __init__(self, locale: str = "en-us") -> None:
-        # Resolve the directory where this script (strings.py) is located
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        # Get the directory of strings.py (e.g., .../CsProfAnalyzer/core)
+        core_dir = os.path.dirname(os.path.abspath(__file__))
         
-        # PyInstaller uses _MEIPASS; script execution looks in the directory of this file
-        base_path = getattr(sys, "_MEIPASS", os.path.dirname(script_dir))
-        
-        # Adjust path: the locale folder is at the project root level
-        strings_path = os.path.join(base_path, "locale", locale, "strings.json")
+        # PyInstaller bundled location
+        if hasattr(sys, "_MEIPASS"):
+            base_path = sys._MEIPASS
+            # With --add-data "core/locale;locale", PyInstaller puts core/locale at locale/
+            strings_path = os.path.join(base_path, "locale", locale, "strings.json")
+        else:
+            # Script execution location: .../CsProfAnalyzer/core/locale/en-us/strings.json
+            strings_path = os.path.join(core_dir, "locale", locale, "strings.json")
 
         if not os.path.exists(strings_path):
-            # Fallback for development if the structure is different
-            fallback_path = os.path.join(script_dir, "..", "locale", locale, "strings.json")
-            if os.path.exists(fallback_path):
-                strings_path = fallback_path
-            else:
-                raise FileNotFoundError(
-                    f"UI strings file for {locale} not found at: {strings_path} or {fallback_path}"
-                )
+            raise FileNotFoundError(
+                f"UI strings file for {locale} not found at: {strings_path}"
+            )
 
         with open(strings_path, "r", encoding="utf-8") as file:
             self._data: Final[dict] = json.load(file)
