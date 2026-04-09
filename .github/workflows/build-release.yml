@@ -97,6 +97,9 @@ jobs:
           fi
           git tag $TAG
           git push origin $TAG
+      - name: Rename executable
+        run: mv dist/CsProfAnalyzer.exe dist/CsProfAnalyzer-${{ steps.get_version.outputs.version }}.exe
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -106,4 +109,4 @@ jobs:
           prerelease: false
           fail_on_unmatched_files: true
           files: |
-            dist/CsProfAnalyzer.exe
+            dist/CsProfAnalyzer-${{ steps.get_version.outputs.version }}.exe
