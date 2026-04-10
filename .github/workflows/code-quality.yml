@@ -15,8 +15,11 @@ jobs:
           fetch-depth: 2
       - name: Check version change
         run: |
-          # Get files that changed
-          files=$(git diff --name-only origin/master...HEAD)
+          # Identify the base branch (master or main)
+          base_branch=$(git branch -r | grep -E 'origin/(master|main)$' | head -n 1)
+          
+          # Get files that changed compared to the base branch
+          files=$(git diff --name-only $base_branch...HEAD)
           relevant_files=""
           for f in $files; do
             if ! python .github/scripts/ci_cd_utils.py check "$f"; then
@@ -26,7 +29,7 @@ jobs:
 
           if [ -n "$relevant_files" ]; then
             # Extract old and new versions
-            old_version=$(git show origin/master:core/__version__.py | grep "__version__ =" | cut -d'"' -f2)
+            old_version=$(git show $base_branch:core/__version__.py | grep "__version__ =" | cut -d'"' -f2)
             new_version=$(grep "__version__ =" core/__version__.py | cut -d'"' -f2)
 
             if python .github/scripts/ci_cd_utils.py "$old_version" "$new_version"; then
