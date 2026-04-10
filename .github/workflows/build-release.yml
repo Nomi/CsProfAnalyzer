@@ -125,16 +125,16 @@ jobs:
       - name: Generate Changelog
         id: changelog
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "body<<EOF" >> $GITHUB_OUTPUT
-            echo "Manually triggered release." >> $GITHUB_OUTPUT
-            echo "${{ github.event.inputs.release_notes }}" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "body<<EOF" >> $GITHUB_OUTPUT
-            git log -1 --pretty=format:"%s%n%b" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          fi
+          {
+            echo "body<<EOF"
+            if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+              echo "Manually triggered release."
+              echo "${{ github.event.inputs.release_notes }}"
+            else
+              git log -1 --pretty=format:"%s%n%b"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
       - name: Create Tag
         run: |
           git config user.name "github-actions"
