@@ -1,20 +1,32 @@
 import sys
 import re
+from pathlib import Path
+
+# Common blocklist pattern used across the project
+BLOCKLIST_PATTERN = r'^(ReadMe\.md|\.gitignore|\.github/.*|\.git.*|tests/.*)$'
 
 def parse_version(v):
     return [int(x) for x in re.findall(r'\d+', v)]
 
-def validate():
-    try:
-        old_v = parse_version(sys.argv[1])
-        new_v = parse_version(sys.argv[2])
-    except Exception:
-        sys.exit(1)
+def is_ignored(file_path):
+    return re.match(BLOCKLIST_PATTERN, file_path) is not None
 
-    # Compare SemVer tuple (major, minor, patch)
-    if new_v > old_v:
-        sys.exit(0)
-    sys.exit(1)
+def validate_semver(old_v, new_v):
+    try:
+        old_tuple = parse_version(old_v)
+        new_tuple = parse_version(new_v)
+    except Exception:
+        return False
+    return new_tuple > old_tuple
 
 if __name__ == "__main__":
-    validate()
+    # If called with 'check', validate a file path against the blocklist
+    if len(sys.argv) > 1 and sys.argv[1] == 'check':
+        if is_ignored(sys.argv[2]):
+            sys.exit(0) # Should be ignored
+        sys.exit(1) # Should be validated
+    
+    # Otherwise perform SemVer comparison
+    if validate_semver(sys.argv[1], sys.argv[2]):
+        sys.exit(0)
+    sys.exit(1)

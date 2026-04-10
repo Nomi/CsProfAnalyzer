@@ -34,9 +34,15 @@ jobs:
       - id: check
         run: |
           # Check if relevant files changed
-          BLOCKLIST_PATTERN='^(.*\.md|\.gitignore|\.github\/.*)$'
-          if git diff --name-only HEAD^ HEAD | grep -qvE "$BLOCKLIST_PATTERN"; then
-            
+          files=$(git diff --name-only HEAD^ HEAD)
+          relevant_files=""
+          for f in $files; do
+            if ! python .github/scripts/validate_semver.py check "$f"; then
+              relevant_files="$relevant_files $f"
+            fi
+          done
+
+          if [ -n "$relevant_files" ]; then
             # Extract old and new versions
             old_version=$(git show HEAD^:core/__version__.py | grep "__version__ =" | cut -d'"' -f2)
             new_version=$(grep "__version__ =" core/__version__.py | cut -d'"' -f2)
