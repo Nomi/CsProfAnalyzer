@@ -8,7 +8,7 @@ from types import MappingProxyType
 from typing import Dict, Any, Final
 
 
-class AppConfig:
+class Config:
     """Read-only configuration loaded from JSON with schema validation."""
 
     SCHEMA = {
@@ -86,4 +86,4 @@ class AppConfig:
         return str(self._data["COL_SERVER_MS"])
 
 
-CFG = AppConfig()
+CFG = Config()
