@@ -18,10 +18,10 @@ jobs:
       - name: Get changed files
         id: files
         run: |
-          # Use the same blocklist logic to identify files to scan
-          BLOCKLIST_PATTERN='^(ReadMe\.md|\.gitignore|\.github\/.*|\.git.*|tests\/.*)$'
-          # Find all python and json files not in the blocklist
-          changed_files=$(find . -type f \( -name "*.py" -o -name "*.json" \) | grep -vE "$BLOCKLIST_PATTERN" | sed 's|^\./||' | tr '\n' ' ')
+          # Define files and directories that DON'T need a scan
+          BLOCKLIST_PATTERN='^(ReadMe\.md|\.gitignore|\.github\/.*|\.git.*|tests\/.*|requirements\.txt)$'
+          # Find all files, then exclude blocklisted files
+          changed_files=$(find . -type f | grep -vE "$BLOCKLIST_PATTERN" | sed 's|^\./||' | tr '\n' ' ')
           echo "files=$changed_files" >> $GITHUB_OUTPUT
 
       - name: VirusTotal Scan

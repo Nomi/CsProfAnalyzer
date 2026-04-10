@@ -15,8 +15,8 @@ jobs:
           fetch-depth: 2
       - name: Check version change
         run: |
-          # Define files that don't need a version bump
-          BLOCKLIST_PATTERN='^(ReadMe\.md|\.gitignore|\.github\/.*|\.git.*|tests\/.*)$'
+          # Define files and directories that DON'T need a version bump
+          BLOCKLIST_PATTERN='^(ReadMe\.md|\.gitignore|\.github\/.*|\.git.*|tests\/.*|requirements\.txt)$'
           
           # Check for changes in all files except those in the blocklist
           if git diff --name-only origin/master...HEAD | grep -qvE "$BLOCKLIST_PATTERN"; then
