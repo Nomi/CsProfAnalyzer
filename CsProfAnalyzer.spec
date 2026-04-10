@@ -1,14 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
-# Automatically collect submodules for our main dependencies
+# Explicitly collect everything required
 hidden = collect_submodules('pandas') + collect_submodules('numpy') + ['colorama', 'tqdm']
+datas = collect_data_files('colorama') + [('core/locale', 'core/locale'), ('config.json', '.')]
 
 a = Analysis(
     ['cs_prof_analyzer.py'],
     pathex=[],
     binaries=[],
-    datas=[('core/locale', 'core/locale'), ('config.json', '.')],
+    datas=datas,
     hiddenimports=hidden,
     hookspath=[],
     hooksconfig={},
