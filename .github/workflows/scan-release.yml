@@ -2,13 +2,13 @@ name: VirusTotal Release Scan
 
 on:
   workflow_run:
-    workflows: ["Build and Release"] # Must exactly match the 'name' in build-release.yml
+    workflows: ["Build and Release"]
     types:
       - completed
 
 jobs:
   scan:
-    # Only run the scan if the build pipeline was actually successful
+    # Only run if the build was successful
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
@@ -18,8 +18,8 @@ jobs:
         id: get_tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Asks GitHub for the name of the most recently published release
         run: |
+          # Dynamically finds the tag of the release you just published
           TAG=$(gh release view --repo ${{ github.repository }} --json tagName -q .tagName)
           echo "tag=$TAG" >> $GITHUB_OUTPUT
 
@@ -35,18 +35,38 @@ jobs:
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          update_release_body: false # Disabled because we are no longer in a 'release' event context
+          update_release_body: false 
           files: |
             *.exe
             *.zip
 
-      - name: Append Scan to Release
+      - name: Format Scan Results
+        id: format
+        run: |
+          echo "#### 🛡️ VirusTotal Security Report" > report.md
+          echo "| File | Status | Analysis Link |" >> report.md
+          echo "| :--- | :--- | :--- |" >> report.md
+          
+          # Splits the comma-separated string into a clean table with badges
+          IFS=',' read -ra ADDR <<< "${{ steps.vt_scan.outputs.analysis }}"
+          for i in "${ADDR[@]}"; do
+            filename=$(echo $i | cut -d'=' -f1)
+            url=$(echo $i | cut -d'=' -f2)
+            # This adds the badge alongside each file report
+            badge="![Scanned](https://img.shields.io/badge/VirusTotal-Scanned-brightgreen?style=flat-square&logo=virustotal)"
+            echo "| \`$filename\` | $badge | [View Full Report]($url) |" >> report.md
+          done
+          
+          {
+            echo 'table<<EOF'
+            cat report.md
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update Release Body
         uses: softprops/action-gh-release@v2
         if: steps.vt_scan.outputs.analysis != ''
         with:
           tag_name: ${{ steps.get_tag.outputs.tag }}
           append_body: true
-          body: |
-            
-            ### 🛡️ VirusTotal Scan Results
-            ${{ steps.vt_scan.outputs.analysis }}
+          body: ${{ steps.format.outputs.table }}
