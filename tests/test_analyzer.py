@@ -8,8 +8,8 @@ import hashlib
 import io
 from unittest.mock import patch, mock_open
 from contextlib import redirect_stdout
-from core.analyzer import CS2Analyzer
-from core.config import AppConfig
+from src.core.analyzer import CS2Analyzer
+from src.core.config import AppConfig
 
 
 class AnalyzerTestSuite(unittest.TestCase):
@@ -61,9 +61,9 @@ class AnalyzerTestSuite(unittest.TestCase):
         import sys
         
         f = StringIO()
-        with redirect_stdout(f), patch("sys.argv", ["cs_prof_analyzer.py", "--help"]), patch("sys.exit"), patch("cs_prof_analyzer.CS2Analyzer"):
+        with redirect_stdout(f), patch("sys.argv", ["cs_prof_analyzer.py", "--help"]), patch("sys.exit"), patch("src.cs_prof_analyzer.cs_prof_analyzer.CS2Analyzer"):
             # We need to simulate the argument parsing
-            from cs_prof_analyzer import main
+            from src.cs_prof_analyzer.cs_prof_analyzer import main
             try:
                 main()
             except SystemExit:

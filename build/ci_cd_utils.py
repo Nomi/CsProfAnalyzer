@@ -8,7 +8,7 @@ BLOCKLIST_PATTERN = r'^(ReadMe\.md|\.gitignore|\.github/.*|\.git.*|tests/.*)$'
 def parse_version_from_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
-        match = re.search(r'__version__\s*=\s*"([\d\.]+)"', content)
+        match = re.search(r'__version__\s*=\s*["\']([\d\.]+)["\']', content)
         if not match:
             raise ValueError(f"Could not find version in {file_path}")
         return [int(x) for x in match.group(1).split('.')]

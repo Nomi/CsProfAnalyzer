@@ -1,7 +1,9 @@
 """Application configuration module."""
 
 import json
-from importlib import resources
+import sys
+from pathlib import Path
+from .utils import get_app_dir
 from types import MappingProxyType
 from typing import Dict, Any, Final
 
@@ -21,15 +23,9 @@ class AppConfig:
     }
 
     def __init__(self, config_name: str = "config.json") -> None:
-        # Determine asset path using importlib.resources
-        # Assuming config.json is at the package root level or needs to be found
-        # If it's a file at the project root, this assumes the 'core' package can access it
-        try:
-            config_path = resources.files("core").parent / config_name
-        except Exception:
-            # Fallback if structure is unexpected
-            config_path = resources.files("core").parent / config_name
-            
+        base_path = get_app_dir()
+        config_path = base_path / config_name
+        
         if not config_path.exists():
             raise FileNotFoundError(f"Config file not found: {config_path}")
 

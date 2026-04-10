@@ -1,6 +1,15 @@
-"""Utility functions for dependency validation and glossary display."""
-
 import sys
+from pathlib import Path
+
+def get_app_dir():
+    # If running as an EXE via PyInstaller
+    if getattr(sys, 'frozen', False):
+        return Path(sys._MEIPASS)
+    # If running as a script (module is src/core/utils.py, so go up 2 levels to src/)
+    return Path(__file__).resolve().parent.parent
+
+"""Utility functions for dependency validation and glossary display."""
+from colorama import Fore, Style
 from .strings import STRINGS, C_YELLOW, C_RESET
 
 
