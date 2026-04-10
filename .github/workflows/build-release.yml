@@ -37,7 +37,7 @@ jobs:
           files=$(git diff --name-only HEAD^ HEAD)
           relevant_files=""
           for f in $files; do
-            if ! python .github/scripts/validate_semver.py check "$f"; then
+            if ! python .github/scripts/ci_cd_utils.py check "$f"; then
               relevant_files="$relevant_files $f"
             fi
           done
@@ -47,7 +47,7 @@ jobs:
             old_version=$(git show HEAD^:core/__version__.py | grep "__version__ =" | cut -d'"' -f2)
             new_version=$(grep "__version__ =" core/__version__.py | cut -d'"' -f2)
             
-            if python .github/scripts/validate_semver.py "$old_version" "$new_version"; then
+            if python .github/scripts/ci_cd_utils.py "$old_version" "$new_version"; then
               echo "version_changed=true" >> $GITHUB_OUTPUT
             else
               echo "Error: core/__version__.py must be incremented when code changes occur."
