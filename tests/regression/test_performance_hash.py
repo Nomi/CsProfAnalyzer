@@ -2,12 +2,12 @@ import hashlib
 import io
 from contextlib import redirect_stdout
 from pathlib import Path
-from src.core.cs_analyzer import CsAnalyzer
+from src.core.cs_prof_analyzer import CsProfAnalyzer
 
 def test_analyzer_output_hash():
     """Regression test: Ensure analyzer --brief output matches known SHA256 hash."""
     dust2_path = Path(__file__).parent.parent / "data" / "prof_de_dust2.csv"
-    dust2_analyzer = CsAnalyzer(str(dust2_path))
+    dust2_analyzer = CsProfAnalyzer(str(dust2_path))
     dust2_analyzer.load_data()
     
     # Capture stdout
