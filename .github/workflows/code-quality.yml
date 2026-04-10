@@ -15,22 +15,17 @@ jobs:
           fetch-depth: 2
       - name: Check version change
         run: |
-          # Define files and directories that DON'T need a version bump
+          # Define files that don't need a version bump
           BLOCKLIST_PATTERN='^(ReadMe\.md|\.gitignore|\.github\/.*|\.git.*|tests\/.*)$'
           
           # Check for changes in all files except those in the blocklist
           if git diff --name-only origin/master...HEAD | grep -qvE "$BLOCKLIST_PATTERN"; then
             
             # Extract old and new versions
-            old_version=$(git show origin/master:core/__version__.py | grep "__version__ =" | cut -d'"' -f2 | tr -d '.')
-            new_version=$(grep "__version__ =" core/__version__.py | cut -d'"' -f2 | tr -d '.')
+            old_version=$(git show origin/master:core/__version__.py | grep "__version__ =" | cut -d'"' -f2)
+            new_version=$(grep "__version__ =" core/__version__.py | cut -d'"' -f2)
             
-            if [ -z "$old_version" ] || [ -z "$new_version" ]; then
-              echo "Error: Could not parse versions."
-              exit 1
-            fi
-            
-            if [ "$new_version" -gt "$old_version" ]; then
+            if python .github/scripts/validate_semver.py "$old_version" "$new_version"; then
               echo "Version incremented successfully ($old_version -> $new_version)."
             else
               echo "Error: core/__version__.py must be incremented when changes occur to non-ignored files."
