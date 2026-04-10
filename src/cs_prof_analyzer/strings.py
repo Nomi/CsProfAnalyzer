@@ -11,8 +11,8 @@ class Strings:
 
     def __init__(self, locale: str = "en-us") -> None:
         # Resolve the asset path using importlib.resources
-        # Assuming core/locale is a package/directory structure
-        data_dir = resources.files("core.locale") / locale
+        # Package structure is src.cs_prof_analyzer.core.locale
+        data_dir = resources.files("src.cs_prof_analyzer.core.locale") / locale
         strings_path = data_dir / "strings.json"
 
         if not strings_path.exists():

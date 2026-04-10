@@ -19,7 +19,7 @@ jobs:
           files=$(git diff --name-only $base_branch...HEAD)
           relevant_files=""
           for f in $files; do
-            if ! python .github/scripts/ci_cd_utils.py check "$f"; then
+            if ! python build/ci_cd_utils.py check "$f"; then
               relevant_files="$relevant_files $f"
             fi
           done
@@ -28,12 +28,12 @@ jobs:
             echo "The following files triggered the version bump requirement:"
             echo "$relevant_files"
             
-            git show $base_branch:core/__version__.py > old_version.py
+            git show $base_branch:src/cs_prof_analyzer/core/__version__.py > old_version.py
             
-            if python .github/scripts/ci_cd_utils.py old_version.py core/__version__.py; then
+            if python build/ci_cd_utils.py old_version.py src/cs_prof_analyzer/core/__version__.py; then
               echo "Version incremented successfully."
             else
-              echo "Error: core/__version__.py must be incremented when changes occur to non-ignored files."
+              echo "Error: src/cs_prof_analyzer/core/__version__.py must be incremented when changes occur to non-ignored files."
               exit 1
             fi
           else
