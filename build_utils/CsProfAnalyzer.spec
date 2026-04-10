@@ -8,8 +8,8 @@ sys.path.append(os.path.abspath('../src'))
 # PyInstaller automatically detects imports installed in the current environment
 # We only need to specify data files that are not automatically detected
 a = Analysis(
-    ['../src/cs_prof_analyzer.py'],
-    pathex=[],
+    ['../src/main.py'],
+    pathex=['../src'],
     binaries=[],
     datas=[('../src/locale', 'locale'), ('../src/config.json', '.')],
     hiddenimports=[],

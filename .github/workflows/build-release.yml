@@ -5,6 +5,10 @@ on:
     branches:
       - master
       - main
+  pull_request:
+    branches:
+      - master
+      - main
   workflow_dispatch:
     inputs:
       skip_validation:
@@ -20,6 +24,10 @@ on:
         required: false
         default: ''
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-version:
     runs-on: ubuntu-latest
@@ -28,22 +36,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0 # Full history to compare against base branch
       - id: check
         run: |
-          files=$(git diff --name-only HEAD^ HEAD)
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            base_ref="origin/${{ github.base_ref }}"
+          else
+            base_ref="HEAD^"
+          fi
+          
+          files=$(git diff --name-only $base_ref HEAD)
           relevant_files=""
           for f in $files; do
-            if ! python build/ci_cd_utils.py check "$f"; then
+            if ! python build_utils/ci_cd_utils.py check "$f"; then
               relevant_files="$relevant_files $f"
             fi
           done
-          if [ -n "$relevant_files" ]; then
-            git show HEAD^:src/core/__version__.py > old_version.py
-            if python build/ci_cd_utils.py old_version.py src/core/__version__.py; then
+          
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+             echo "version_changed=true" >> $GITHUB_OUTPUT
+          elif [ -n "$relevant_files" ]; then
+            git show $base_ref:src/core/__version__.py > old_version.py
+            if python build_utils/ci_cd_utils.py old_version.py src/core/__version__.py; then
               echo "version_changed=true" >> $GITHUB_OUTPUT
             else
-              echo "Error: src/core/__version__.py must be incremented."
+              echo "Error: Version must be incremented relative to $base_ref."
               exit 1
             fi
           else
@@ -52,10 +69,13 @@ jobs:
 
   build-and-test:
     needs: [validate-version]
-    if: github.event_name == 'workflow_dispatch' || needs.validate-version.outputs.version_changed == 'true'
+    # Run on PRs (to test pseudo-merge) or when version changes on push/dispatch
+    if: github.event_name == 'pull_request' || needs.validate-version.outputs.version_changed == 'true'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -71,7 +91,7 @@ jobs:
         run: ./dist/CsProfAnalyzer.exe --help
       - name: Create Source Archive
         run: |
-          7z a dist/CsProfAnalyzer-script-${{ github.event.inputs.version || '0.1.6' }}.zip src/
+          7z a dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version || '0.1.9' }}.zip src/
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -82,14 +102,16 @@ jobs:
 
   release:
     needs: [build-and-test]
-    # Only run release if on master/main and it's a push or manual trigger, not a PR/feature branch
-    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    # Allowlist: only on push to production branches OR manual dispatch
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')) || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     environment: Production
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -98,7 +120,6 @@ jobs:
       - name: Get Version
         id: get_version
         run: |
-          # Extract version, trim whitespace/quotes
           version=$(grep "__version__ =" src/core/__version__.py | cut -d'"' -f2 | xargs)
           echo "version=$version" >> $GITHUB_OUTPUT
       - name: Generate Changelog
@@ -119,7 +140,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           TAG=v${{ steps.get_version.outputs.version }}
-          if [ "${{ github.event.inputs.force_overwrite }}" == "true" ]; then
+          if [ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.force_overwrite == 'true' }}" == "true" ]; then
             git tag -d $TAG || true
             git push --delete origin $TAG || true
           fi

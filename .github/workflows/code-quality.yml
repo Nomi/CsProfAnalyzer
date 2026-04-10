@@ -1,50 +1,33 @@
 name: CI / Quality Check
 
 on:
+  push:
+    branches:
+      - master
+      - main
   pull_request:
     branches:
       - master
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  validate-version:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Check version change
-        run: |
-          base_branch=$(git branch -r | grep -E 'origin/(master|main)$' | head -n 1)
-          files=$(git diff --name-only $base_branch...HEAD)
-          relevant_files=""
-          for f in $files; do
-            if ! python build_utils/ci_cd_utils.py check "$f"; then
-              relevant_files="$relevant_files $f"
-            fi
-          done
-
-          if [ -n "$relevant_files" ]; then
-            echo "The following files triggered the version bump requirement:"
-            echo "$relevant_files"
-
-            git show $base_branch:src/core/__version__.py > old_version.py
-
-            # Check if version incremented (handle potential path changes)
-            if python build_utils/ci_cd_utils.py old_version.py src/core/__version__.py; then
-              echo "Version incremented successfully."
-            else
-              echo "Error: src/core/__version__.py must be incremented."
-              exit 1
-            fi
-          else
-            echo "No relevant changes detected, skipping version validation."
-          fi
-
-
   validate-lint:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event == null || github.event.pull_request.head.repo.full_name == github.repository
     steps:
+      - name: Check for active PRs
+        if: github.event_name == 'push'
+        run: |
+          PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ github.repository_owner }}:${{ github.ref_name }}" | jq length)
+          if [ "$PR_COUNT" -gt 0 ]; then
+            echo "PR exists for this branch, skipping push run."
+            exit 0
+          fi
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -60,7 +43,17 @@ jobs:
 
   validate-tests:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event == null || github.event.pull_request.head.repo.full_name == github.repository
     steps:
+      - name: Check for active PRs
+        if: github.event_name == 'push'
+        run: |
+          PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ github.repository_owner }}:${{ github.ref_name }}" | jq length)
+          if [ "$PR_COUNT" -gt 0 ]; then
+            echo "PR exists for this branch, skipping push run."
+            exit 0
+          fi
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5

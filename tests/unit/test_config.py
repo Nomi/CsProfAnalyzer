@@ -1,7 +1,7 @@
 import pytest
 import json
 from unittest.mock import patch, mock_open
-from src.core.config import Config
+from core.config import Config
 
 def test_configuration_loading():
     mock_json = json.dumps({

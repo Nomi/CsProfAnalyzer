@@ -1,7 +1,7 @@
 import pytest
 import tempfile
 import os
-from src.core.cs_prof_analyzer import CsProfAnalyzer
+from core.cs_prof_analyzer import CsProfAnalyzer
 
 @pytest.fixture
 def temp_csv():
