@@ -1,6 +1,8 @@
 # CS2 Frame Analysis Utility
 
-### Pipeline Status (Production / master)
+### Status
+
+#### Production (master)
 
 | Action | Status |
 | :--- | :--- |
@@ -8,7 +10,7 @@
 | **VirusTotal Scans** | [![VirusTotal Scans](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml) |
 | **CI / Quality Check** | [![CI / Quality Check](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/code-quality.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/code-quality.yml) |
 
-### Pipeline Status (Development / dev)
+#### Development (dev)
 
 | Action | Status |
 | :--- | :--- |
