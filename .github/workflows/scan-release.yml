@@ -43,17 +43,18 @@ jobs:
       - name: Format Scan Results
         id: format
         run: |
-          echo "#### 🛡️ VirusTotal Security Report" > report.md
+          echo "### 🛡️ VirusTotal Security Report" > report.md
           echo "| File | Status | Analysis Link |" >> report.md
           echo "| :--- | :--- | :--- |" >> report.md
           
-          # Splits the comma-separated string into a clean table with badges
           IFS=',' read -ra ADDR <<< "${{ steps.vt_scan.outputs.analysis }}"
           for i in "${ADDR[@]}"; do
             filename=$(echo $i | cut -d'=' -f1)
-            url=$(echo $i | cut -d'=' -f2)
-            # This adds the badge alongside each file report
-            badge="![Scanned](https://img.shields.io/badge/VirusTotal-Scanned-brightgreen?style=flat-square&logo=virustotal)"
+            # Use -f2- to handle base64 padding (==) in the URL
+            url=$(echo $i | cut -d'=' -f2-)
+            
+            # Changed to blue/Report to be more accurate (since we can't see the score here)
+            badge="![Report](https://img.shields.io/badge/VirusTotal-Report-blue?style=flat-square&logo=virustotal)"
             echo "| \`$filename\` | $badge | [View Full Report]($url) |" >> report.md
           done
           
