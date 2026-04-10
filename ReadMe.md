@@ -5,7 +5,8 @@
 #### Release
 
 **Latest Release:** 
-[![GitHub Release](https://img.shields.io/github/v/release/Nomi/CsProfAnalyzer?style=flat-square)](https://github.com/Nomi/CsProfAnalyzer/releases/latest) | **VirusTotal Scans** | [![VirusTotal Scans](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml) |
+
+[![GitHub Release](https://img.shields.io/github/v/release/Nomi/CsProfAnalyzer?style=flat-square)](https://github.com/Nomi/CsProfAnalyzer/releases/latest)
 
 | Action | Status |
 | :--- | :--- |
