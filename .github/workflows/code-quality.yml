@@ -25,7 +25,7 @@ jobs:
             old_version=$(git show origin/master:core/__version__.py | grep "__version__ =" | cut -d'"' -f2)
             new_version=$(grep "__version__ =" core/__version__.py | cut -d'"' -f2)
             
-            if python scripts/validate_semver.py "$old_version" "$new_version"; then
+            if python .github/scripts/validate_semver.py "$old_version" "$new_version"; then
               echo "Version incremented successfully ($old_version -> $new_version)."
             else
               echo "Error: core/__version__.py must be incremented when changes occur to non-ignored files."
