@@ -37,18 +37,18 @@ jobs:
           files=$(git diff --name-only HEAD^ HEAD)
           relevant_files=""
           for f in $files; do
-            if ! python .github/scripts/ci_cd_utils.py check "$f"; then
+            if ! python build/ci_cd_utils.py check "$f"; then
               relevant_files="$relevant_files $f"
             fi
           done
 
           if [ -n "$relevant_files" ]; then
-            git show HEAD^:core/__version__.py > old_version.py
+            git show HEAD^:src/cs_prof_analyzer/core/__version__.py > old_version.py
             
-            if python .github/scripts/ci_cd_utils.py old_version.py core/__version__.py; then
+            if python build/ci_cd_utils.py old_version.py src/cs_prof_analyzer/core/__version__.py; then
               echo "version_changed=true" >> $GITHUB_OUTPUT
             else
-              echo "Error: core/__version__.py must be incremented when code changes occur."
+              echo "Error: src/cs_prof_analyzer/core/__version__.py must be incremented when code changes occur."
               exit 1
             fi
           else
@@ -72,10 +72,10 @@ jobs:
           python-version: '3.10'
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r src/cs_prof_analyzer/requirements.txt
           pip install pyinstaller pyinstaller-hooks-contrib
       - name: Build executable
-        run: pyinstaller CsProfAnalyzer.spec
+        run: pyinstaller build/CsProfAnalyzer.spec
       - name: Test executable
         run: ./dist/CsProfAnalyzer.exe --help
       - name: VirusTotal Scan
@@ -90,7 +90,7 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          version=$(python -c "import core.__version__; print(core.__version__.__version__)")
+          version=$(python -c "import src.cs_prof_analyzer.core.__version__; print(src.cs_prof_analyzer.core.__version__.__version__)")
           echo "version=$version" >> $GITHUB_OUTPUT
       - name: Generate Changelog
         id: changelog

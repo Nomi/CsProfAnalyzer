@@ -1,15 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+import sys
+import os
+
+# Ensure the src directory is in the path
+sys.path.append(os.path.abspath('../src'))
 
 def get_requirements():
     try:
-        with open('requirements.txt', 'r') as f:
+        with open('../src/cs_prof_analyzer/requirements.txt', 'r') as f:
             reqs = []
             for line in f:
                 line = line.strip()
                 if not line or line.startswith('#'):
                     continue
-                # Split by ==, >=, or <= to get the package name
                 name = re.split(r'==|>=|<=', line)[0].strip()
                 if name:
                     reqs.append(name)
@@ -19,14 +23,15 @@ def get_requirements():
 
 reqs = get_requirements()
 hidden = []
-datas = [('core/locale', 'core/locale'), ('config.json', '.')]
+# Ensure locale and config are correctly referenced
+datas = [('../src/cs_prof_analyzer/core/locale', 'core/locale'), ('../src/cs_prof_analyzer/config.json', '.')]
 
 for r in reqs:
     hidden += collect_submodules(r)
     datas += collect_data_files(r)
 
 a = Analysis(
-    ['cs_prof_analyzer.py'],
+    ['../src/cs_prof_analyzer/cs_prof_analyzer.py'],
     pathex=[],
     binaries=[],
     datas=datas,
