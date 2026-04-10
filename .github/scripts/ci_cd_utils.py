@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 # Common blocklist pattern used across the project
-BLOCKLIST_PATTERN = r'^(ReadMe\.md|\.gitignore|\.github/.*|\.git.*|tests/.*|CsProfAnalyzer\.spec)$'
+BLOCKLIST_PATTERN = r'^(ReadMe\.md|\.gitignore|\.github/.*|\.git.*|tests/.*)$'
 
 def parse_version(v):
     return [int(x) for x in re.findall(r'\d+', v)]
