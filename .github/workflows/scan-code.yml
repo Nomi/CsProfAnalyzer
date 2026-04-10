@@ -5,16 +5,28 @@ on:
     branches:
       - master
       - main
+  pull_request:
+    branches:
+      - master
+      - main
 
 jobs:
   virustotal-code-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Get changed files
+        id: files
+        run: |
+          # Use the same blocklist logic to identify files to scan
+          BLOCKLIST_PATTERN='^(ReadMe\.md|\.gitignore|\.github\/.*|\.git.*|tests\/.*)$'
+          # Find all python and json files not in the blocklist
+          changed_files=$(find . -type f \( -name "*.py" -o -name "*.json" \) | grep -vE "$BLOCKLIST_PATTERN" | sed 's|^\./||' | tr '\n' ' ')
+          echo "files=$changed_files" >> $GITHUB_OUTPUT
+
       - name: VirusTotal Scan
+        if: steps.files.outputs.files != ''
         uses: crazy-max/ghaction-virustotal@v5
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
-          files: |
-            cs_prof_analyzer.py
-            core/*.py
+          files: ${{ steps.files.outputs.files }}
