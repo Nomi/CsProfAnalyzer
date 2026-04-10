@@ -22,8 +22,6 @@ on:
 
 jobs:
   validate-version:
-    permissions:
-      contents: write
     runs-on: ubuntu-latest
     outputs:
       version_changed: ${{ steps.check.outputs.version_changed }}
@@ -33,68 +31,76 @@ jobs:
           fetch-depth: 2
       - id: check
         run: |
-          # Check if relevant files changed
           files=$(git diff --name-only HEAD^ HEAD)
           relevant_files=""
           for f in $files; do
-            if ! python .github/scripts/ci_cd_utils.py check "$f"; then
+            if ! python build/ci_cd_utils.py check "$f"; then
               relevant_files="$relevant_files $f"
             fi
           done
-
           if [ -n "$relevant_files" ]; then
-            git show HEAD^:core/__version__.py > old_version.py
-            
-            if python .github/scripts/ci_cd_utils.py old_version.py core/__version__.py; then
+            git show HEAD^:src/core/__version__.py > old_version.py
+            if python build/ci_cd_utils.py old_version.py src/core/__version__.py; then
               echo "version_changed=true" >> $GITHUB_OUTPUT
             else
-              echo "Error: core/__version__.py must be incremented when code changes occur."
+              echo "Error: Version must be incremented."
               exit 1
             fi
           else
             echo "version_changed=false" >> $GITHUB_OUTPUT
           fi
 
-  build-and-release:
+  build-and-test:
     needs: [validate-version]
     if: github.event_name == 'workflow_dispatch' || needs.validate-version.outputs.version_changed == 'true'
     runs-on: windows-latest
-    permissions:
-      contents: write
-    environment: Production
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r src/requirements.txt
           pip install pyinstaller pyinstaller-hooks-contrib
       - name: Build executable
-        run: pyinstaller CsProfAnalyzer.spec
+        run: pyinstaller --clean build/CsProfAnalyzer.spec
       - name: Test executable
         run: ./dist/CsProfAnalyzer.exe --help
-      - name: VirusTotal Scan
-        id: vt
-        uses: crazy-max/ghaction-virustotal@v5
+      - name: Create Source Archive
+        run: |
+          7z a dist/CsProfAnalyzer-script-${{ github.event.inputs.version || '0.1.6' }}.zip src/
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
-          update_release_body: true
-          files: |
+          name: artifacts
+          path: |
             dist/CsProfAnalyzer.exe
+            dist/CsProfAnalyzer-script-*.zip
+
+  release:
+    needs: [build-and-test]
+    # Only run release if on master/main and it's a push or manual trigger, not a PR/feature branch
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts
+          path: dist
       - name: Get Version
         id: get_version
-        shell: bash
         run: |
-          version=$(python -c "import core.__version__; print(core.__version__.__version__)")
+          version=$(grep "__version__ =" src/core/__version__.py | cut -d'"' -f2)
           echo "version=$version" >> $GITHUB_OUTPUT
       - name: Generate Changelog
         id: changelog
-        shell: bash
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "body<<EOF" >> $GITHUB_OUTPUT
@@ -107,7 +113,6 @@ jobs:
             echo "EOF" >> $GITHUB_OUTPUT
           fi
       - name: Create Tag
-        shell: bash
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
@@ -119,16 +124,22 @@ jobs:
           git tag $TAG
           git push origin $TAG
       - name: Rename executable
-        shell: bash
-        run: mv dist/CsProfAnalyzer.exe dist/CsProfAnalyzer-${{ steps.get_version.outputs.version }}.exe
-
+        run: |
+          mv dist/CsProfAnalyzer.exe dist/CsProfAnalyzer-win64-${{ steps.get_version.outputs.version }}.exe
+          mv dist/CsProfAnalyzer-script-*.zip dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
+      - name: VirusTotal Scan
+        uses: crazy-max/ghaction-virustotal@v5
+        with:
+          vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
+          update_release_body: true
+          files: |
+            dist/CsProfAnalyzer-win64-${{ steps.get_version.outputs.version }}.exe
+            dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           body: ${{ steps.changelog.outputs.body }}
-          draft: false
-          prerelease: false
-          fail_on_unmatched_files: true
           files: |
-            dist/CsProfAnalyzer-${{ steps.get_version.outputs.version }}.exe
+            dist/CsProfAnalyzer-win64-${{ steps.get_version.outputs.version }}.exe
+            dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
