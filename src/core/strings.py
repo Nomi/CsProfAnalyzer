@@ -1,7 +1,9 @@
 """Strings and UI resource management."""
 
 import json
+import sys
 from importlib import resources
+from .utils import get_app_dir
 from types import MappingProxyType
 from typing import Final
 
@@ -10,10 +12,10 @@ class Strings:
     """Immutable UI strings loaded from locale-specific JSON."""
 
     def __init__(self, locale: str = "en-us") -> None:
-        # Resolve the asset path using importlib.resources
-        # Assuming core/locale is a package/directory structure
-        data_dir = resources.files("core.locale") / locale
-        strings_path = data_dir / "strings.json"
+        # Resolve the asset path using our robust helper
+        base_path = get_app_dir()
+        strings_path = base_path / "locale" / locale / "strings.json"
+
 
         if not strings_path.exists():
             raise FileNotFoundError(f"UI strings file for {locale} not found at: {strings_path}")

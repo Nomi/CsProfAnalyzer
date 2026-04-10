@@ -1,15 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_submodules
+import sys
+import os
 
-# Automatically collect submodules for our main dependencies
-hidden = collect_submodules('pandas') + collect_submodules('numpy') + ['colorama', 'tqdm']
+# Ensure the src directory is in the path for resolution
+sys.path.append(os.path.abspath('../src'))
 
+# PyInstaller automatically detects imports installed in the current environment
+# We only need to specify data files that are not automatically detected
 a = Analysis(
-    ['cs_prof_analyzer.py'],
+    ['../src/cs_prof_analyzer.py'],
     pathex=[],
     binaries=[],
-    datas=[('core/locale', 'core/locale'), ('config.json', '.')],
-    hiddenimports=hidden,
+    datas=[('../src/locale', 'locale'), ('../src/config.json', '.')],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

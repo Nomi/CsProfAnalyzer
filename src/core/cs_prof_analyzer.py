@@ -9,8 +9,7 @@ from colorama import Fore, Style
 from .strings import STRINGS, C_GREEN, C_RESET
 from .config import CFG
 
-
-class CS2Analyzer:
+class CsProfAnalyzer:
     """Class to load, analyze, and report on CS2 performance data."""
 
     def __init__(self, file_path: str) -> None:

@@ -9,9 +9,9 @@ issues and hardware bottlenecks.
 import sys
 import argparse
 import colorama
-from core.strings import STRINGS as STR
-from core.utils import validate_dependencies, show_help_glossary
-from core.analyzer import CS2Analyzer
+from src.core.strings import STRINGS as STR
+from src.core.utils import validate_dependencies, show_help_glossary
+from src.core.cs_prof_analyzer import CsProfAnalyzer
 
 
 def main() -> None:
@@ -39,7 +39,7 @@ def main() -> None:
 
     colorama.init(autoreset=True)
 
-    engine = CS2Analyzer(args.file)
+    engine = CsProfAnalyzer(args.file)
     engine.load_data()
     engine.run_analysis()
     engine.display_report()
