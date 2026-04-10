@@ -1,8 +1,7 @@
 """Application configuration module."""
 
 import json
-import os
-import sys
+from importlib import resources
 from types import MappingProxyType
 from typing import Dict, Any, Final
 
@@ -21,15 +20,20 @@ class AppConfig:
         "COL_SERVER_MS": str,
     }
 
-    def __init__(self, config_path: str = "config.json") -> None:
-        # Determine base path for asset resolution
-        base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        full_config_path = os.path.join(base_path, config_path)
-        
-        if not os.path.exists(full_config_path):
-            raise FileNotFoundError(f"Config file not found: {full_config_path}")
+    def __init__(self, config_name: str = "config.json") -> None:
+        # Determine asset path using importlib.resources
+        # Assuming config.json is at the package root level or needs to be found
+        # If it's a file at the project root, this assumes the 'core' package can access it
+        try:
+            config_path = resources.files("core").parent / config_name
+        except Exception:
+            # Fallback if structure is unexpected
+            config_path = resources.files("core").parent / config_name
+            
+        if not config_path.exists():
+            raise FileNotFoundError(f"Config file not found: {config_path}")
 
-        with open(full_config_path, "r", encoding="utf-8") as file:
+        with config_path.open("r", encoding="utf-8") as file:
             data = json.load(file)
             self._validate(data)
             self._data: Final[Dict[str, Any]] = data

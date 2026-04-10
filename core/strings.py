@@ -1,8 +1,7 @@
 """Strings and UI resource management."""
 
 import json
-import os
-import sys
+from importlib import resources
 from types import MappingProxyType
 from typing import Final
 
@@ -11,22 +10,15 @@ class Strings:
     """Immutable UI strings loaded from locale-specific JSON."""
 
     def __init__(self, locale: str = "en-us") -> None:
-        if getattr(sys, "frozen", False):
-            # If running as a bundle, _MEIPASS is the root
-            base_path = sys._MEIPASS
-        else:
-            # Script execution: core/strings.py -> go up 2 levels to project root
-            base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # Resolve the asset path using importlib.resources
+        # Assuming core/locale is a package/directory structure
+        data_dir = resources.files("core.locale") / locale
+        strings_path = data_dir / "strings.json"
 
-        # Asset is at <base_path>/locale/<locale>/strings.json
-        strings_path = os.path.join(base_path, "locale", locale, "strings.json")
+        if not strings_path.exists():
+            raise FileNotFoundError(f"UI strings file for {locale} not found at: {strings_path}")
 
-        if not os.path.exists(strings_path):
-            raise FileNotFoundError(
-                f"UI strings file for {locale} not found at: {strings_path}"
-            )
-
-        with open(strings_path, "r", encoding="utf-8") as file:
+        with strings_path.open("r", encoding="utf-8") as file:
             self._data: Final[dict] = json.load(file)
 
     def __getattr__(self, name: str) -> str:
