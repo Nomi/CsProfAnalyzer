@@ -1,7 +1,9 @@
 """Unit tests for performance analyzer core logic."""
 
 import unittest
+import tempfile
 import os
+from unittest.mock import patch, mock_open
 from core.analyzer import CS2Analyzer
 from core.config import AppConfig
 
@@ -10,18 +12,19 @@ class TestPerformanceAnalyzer(unittest.TestCase):
     """Test suite for performance analysis."""
 
     def setUp(self):
-        self.config_path = "config.json"
-        self.analyzer = CS2Analyzer("test_data.csv")
-
-        # Create a dummy CSV file
-        with open("test_data.csv", "w", encoding="utf-8") as f:
-            f.write("Time,Frame FPS,Smooth FPS,Frame MS,Smooth MS,Server Frame MS\n")
-            f.write("0.0,60,60,16.6,16.6,16.6\n")
-            f.write("1.0,60,60,16.6,16.6,16.6\n")
+        # Create a temporary file for testing
+        self.test_file = tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8')
+        self.test_file.write("Time,Frame FPS,Smooth FPS,Frame MS,Smooth MS,Server Frame MS\n")
+        self.test_file.write("0.0,60,60,16.6,16.6,16.6\n")
+        self.test_file.write("1.0,60,60,16.6,16.6,16.6\n")
+        self.test_file.close()
+        
+        self.analyzer = CS2Analyzer(self.test_file.name)
 
     def tearDown(self):
-        if os.path.exists("test_data.csv"):
-            os.remove("test_data.csv")
+        # Clean up temporary file
+        if os.path.exists(self.test_file.name):
+            os.remove(self.test_file.name)
 
     def test_load_data(self):
         """Test data loading functionality."""
@@ -31,8 +34,10 @@ class TestPerformanceAnalyzer(unittest.TestCase):
 
     def test_config_loading(self):
         """Test that configuration loads correctly."""
-        config = AppConfig(self.config_path)
-        self.assertIsInstance(config.stutter_threshold_ms, float)
+        mock_json = '{"stutter_threshold_ms": 20.0}'
+        with patch("builtins.open", mock_open(read_data=mock_json)):
+            config = AppConfig("fake_config.json")
+            self.assertEqual(config.stutter_threshold_ms, 20.0)
 
 
 if __name__ == "__main__":
