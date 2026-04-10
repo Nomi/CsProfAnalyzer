@@ -28,6 +28,9 @@ jobs:
           done
 
           if [ -n "$relevant_files" ]; then
+            echo "Non-ignored files detected:"
+            echo "$relevant_files"
+            
             # Extract old and new versions
             old_version=$(git show $base_branch:core/__version__.py | grep "__version__ =" | cut -d'"' -f2)
             new_version=$(grep "__version__ =" core/__version__.py | cut -d'"' -f2)
