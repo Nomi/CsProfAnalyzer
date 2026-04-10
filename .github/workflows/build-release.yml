@@ -153,19 +153,21 @@ jobs:
           if [ ! -f "dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip" ]; then
             mv dist/CsProfAnalyzer-script-*.zip dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
           fi
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          body: ${{ steps.changelog.outputs.body }}
+          files: |
+            dist/CsProfAnalyzer-win64-${{ steps.get_version.outputs.version }}.exe
+            dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
+
       - name: VirusTotal Scan
         uses: crazy-max/ghaction-virustotal@v5
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
           update_release_body: true
-          files: |
-            dist/CsProfAnalyzer-win64-${{ steps.get_version.outputs.version }}.exe
-            dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          body: ${{ steps.changelog.outputs.body }}
           files: |
             dist/CsProfAnalyzer-win64-${{ steps.get_version.outputs.version }}.exe
             dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
