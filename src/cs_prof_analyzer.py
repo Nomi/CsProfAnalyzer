@@ -9,9 +9,9 @@ issues and hardware bottlenecks.
 import sys
 import argparse
 import colorama
-from core.strings import STRINGS as STR
-from core.utils import validate_dependencies, show_help_glossary
-from core.analyzer import CS2Analyzer
+from cs_prof_analyzer.strings import STRINGS as STR
+from cs_prof_analyzer.utils import validate_dependencies, show_help_glossary
+from cs_prof_analyzer.analyzer import CS2Analyzer
 
 
 def main() -> None:

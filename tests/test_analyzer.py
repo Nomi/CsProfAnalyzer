@@ -8,8 +8,8 @@ import hashlib
 import io
 from unittest.mock import patch, mock_open
 from contextlib import redirect_stdout
-from core.analyzer import CS2Analyzer
-from core.config import AppConfig
+from src.cs_prof_analyzer.analyzer import CS2Analyzer
+from src.cs_prof_analyzer.config import AppConfig
 
 
 class AnalyzerTestSuite(unittest.TestCase):
