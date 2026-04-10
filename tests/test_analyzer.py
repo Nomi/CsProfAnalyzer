@@ -13,7 +13,7 @@ class TestPerformanceAnalyzer(unittest.TestCase):
     """Test suite for performance analysis."""
 
     def setUp(self):
-        # Create a temporary file for testing
+        # Create a temporary file for testing (for basic tests)
         self.test_file = tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8')
         self.test_file.write("Time,Frame FPS,Smooth FPS,Frame MS,Smooth MS,Server Frame MS\n")
         self.test_file.write("0.0,60,60,16.6,16.6,16.6\n")
@@ -26,6 +26,20 @@ class TestPerformanceAnalyzer(unittest.TestCase):
         # Clean up temporary file
         if os.path.exists(self.test_file.name):
             os.remove(self.test_file.name)
+
+    def test_dust2_metrics(self):
+        """Test accuracy of metrics calculation using known dust2 data."""
+        from pathlib import Path
+        dust2_path = Path(__file__).parent / "data" / "prof_de_dust2.csv"
+        self.dust2_analyzer = CS2Analyzer(str(dust2_path))
+        self.dust2_analyzer.load_data()
+        
+        self.assertIsNotNone(self.dust2_analyzer.df)
+        self.assertGreater(len(self.dust2_analyzer.df), 1000)
+        
+        from core.config import CFG
+        stutter_count = (self.dust2_analyzer.df[CFG.col_frame_ms] > CFG.stutter_threshold_ms).sum()
+        self.assertGreater(stutter_count, 1000)
 
     def test_load_data(self):
         """Test data loading functionality."""
