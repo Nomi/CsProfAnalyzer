@@ -4,7 +4,16 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 def get_requirements():
     try:
         with open('requirements.txt', 'r') as f:
-            return [line.strip().split('==')[0] for line in f if line.strip() and not line.startswith('#')]
+            reqs = []
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                # Split by ==, >=, or <= to get the package name
+                name = re.split(r'==|>=|<=', line)[0].strip()
+                if name:
+                    reqs.append(name)
+            return reqs
     except FileNotFoundError:
         return []
 
