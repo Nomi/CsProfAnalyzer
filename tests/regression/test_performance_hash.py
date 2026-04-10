@@ -2,7 +2,7 @@ import hashlib
 import io
 from contextlib import redirect_stdout
 from pathlib import Path
-from src.core.cs_prof_analyzer import CsProfAnalyzer
+from core.cs_prof_analyzer import CsProfAnalyzer
 
 def test_analyzer_output_hash():
     """Regression test: Ensure analyzer --brief output matches known SHA256 hash."""

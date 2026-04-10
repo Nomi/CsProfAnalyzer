@@ -13,7 +13,7 @@ def test_help_flag():
     """Integration test: Ensure help output is triggered and correct."""
     f = io.StringIO()
     # Patch CsProfAnalyzer in the entry point module where it's actually imported
-    with patch("src.core.cs_prof_analyzer.CsProfAnalyzer") as MockAnalyzer:
+    with patch("core.cs_prof_analyzer.CsProfAnalyzer") as MockAnalyzer:
         # Prevent analysis execution
         MockAnalyzer.return_value.load_data.return_value = None
         MockAnalyzer.return_value.run_analysis.return_value = None
