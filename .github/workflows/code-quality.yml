@@ -5,12 +5,10 @@ on:
     branches:
       - master
       - main
-      - dev
   pull_request:
     branches:
       - master
       - main
-      - dev
 
 jobs:
   validate-version:
@@ -27,11 +25,6 @@ jobs:
             echo "PR exists for this branch, skipping push run."
             exit 0
           fi
-
-jobs:
-  validate-version:
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -62,7 +55,6 @@ jobs:
           else
             echo "No relevant changes detected, skipping version validation."
           fi
-
 
   validate-lint:
     runs-on: ubuntu-latest

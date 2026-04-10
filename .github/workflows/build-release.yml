@@ -5,7 +5,10 @@ on:
     branches:
       - master
       - main
-      - dev
+  pull_request:
+    branches:
+      - master
+      - main
   workflow_dispatch:
     inputs:
       skip_validation:
@@ -30,7 +33,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version_changed: ${{ steps.check.outputs.version_changed }}
+    if: github.event_name == 'push' || github.event == null || github.event.pull_request.head.repo.full_name == github.repository
     steps:
+      - name: Check for active PRs
+        if: github.event_name == 'push'
+        run: |
+          # If a PR exists for this branch, skip the push run to avoid duplication
+          PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ github.repository_owner }}:${{ github.ref_name }}" | jq length)
+          if [ "$PR_COUNT" -gt 0 ]; then
+            echo "PR exists for this branch, skipping push run."
+            exit 0
+          fi
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
