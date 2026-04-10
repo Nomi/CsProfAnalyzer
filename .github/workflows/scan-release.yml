@@ -3,18 +3,31 @@ name: VirusTotal Release Scan
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'The release tag to scan (e.g., v0.1.9)'
+        required: true
+        default: 'latest'
 
 jobs:
   scan:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required so VirusTotal can edit the release body
+      contents: write
     steps:
       - name: Download Release Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download ${{ github.event.release.tag_name }} --repo ${{ github.repository }}
+          # Uses the release tag if triggered by a release, otherwise uses the manual input
+          TAG_TO_SCAN="${{ github.event.release.tag_name || github.event.inputs.tag_name }}"
+          
+          if [ "$TAG_TO_SCAN" == "latest" ]; then
+            gh release download --repo ${{ github.repository }}
+          else
+            gh release download $TAG_TO_SCAN --repo ${{ github.repository }}
+          fi
 
       - name: VirusTotal Scan
         uses: crazy-max/ghaction-virustotal@v5
