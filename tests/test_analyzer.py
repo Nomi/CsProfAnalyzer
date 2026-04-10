@@ -3,6 +3,7 @@
 import unittest
 import tempfile
 import os
+import json
 from unittest.mock import patch, mock_open
 from core.analyzer import CS2Analyzer
 from core.config import AppConfig
@@ -32,10 +33,27 @@ class TestPerformanceAnalyzer(unittest.TestCase):
         self.assertIsNotNone(self.analyzer.df)
         self.assertEqual(len(self.analyzer.df), 2)
 
+    def test_basic_initialization(self):
+        """Test that analyzer initializes with a valid path."""
+        self.assertIsNotNone(self.analyzer)
+        self.assertEqual(self.analyzer.file_path, self.test_file.name)
+
     def test_config_loading(self):
         """Test that configuration loads correctly."""
-        mock_json = '{"stutter_threshold_ms": 20.0}'
-        with patch("builtins.open", mock_open(read_data=mock_json)):
+        mock_json = json.dumps({
+            "STUTTER_THRESHOLD_MS": 20.0,
+            "PERCENTILE_MAP": {},
+            "COL_TIME": "Time",
+            "COL_FRAME_FPS": "Frame FPS",
+            "COL_SMOOTH_FPS": "Smooth FPS",
+            "COL_FRAME_MS": "Frame MS",
+            "COL_SMOOTH_MS": "Smooth MS",
+            "COL_SERVER_MS": "Server Frame MS"
+        })
+        
+        # Patch exists and the open method on Path objects
+        with patch("pathlib.Path.exists", return_value=True), \
+             patch("pathlib.Path.open", mock_open(read_data=mock_json)):
             config = AppConfig("fake_config.json")
             self.assertEqual(config.stutter_threshold_ms, 20.0)
 
