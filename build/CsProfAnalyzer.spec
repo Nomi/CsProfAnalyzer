@@ -14,7 +14,8 @@ def get_requirements():
                 line = line.strip()
                 if not line or line.startswith('#'):
                     continue
-                name = re.split(r'==|>=|<=', line)[0].strip()
+                # Split by ==, >=, <=, or ~> and keep only the package name
+                name = re.split(r'==|>=|<=|~>', line)[0].strip()
                 if name:
                     reqs.append(name)
             return reqs

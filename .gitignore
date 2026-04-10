@@ -1,12 +1,13 @@
 # Byte-compiled / optimized / DLL files
-/core/__pycache__/
+/src/cs_prof_analyzer/__pycache__/
 __pycache__/
 *.py[cod]
 *$py.class
 
 # Distribution / packaging
 dist/
-build/
+# Note: we kept /build/ for our spec file, so ignore only pyinstaller's build output if needed
+build/CsProfAnalyzer/
 *.egg-info/
 
 # Environments
