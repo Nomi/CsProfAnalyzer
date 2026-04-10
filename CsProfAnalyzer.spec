@@ -5,7 +5,7 @@ a = Analysis(
     ['cs_prof_analyzer.py'],
     pathex=[],
     binaries=[],
-    datas=[('core/locale', 'locale'), ('config.json', '.')],
+    datas=[('core/locale', 'core/locale'), ('config.json', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
