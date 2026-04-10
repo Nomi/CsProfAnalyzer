@@ -28,7 +28,7 @@ jobs:
           done
 
           if [ -n "$relevant_files" ]; then
-            echo "Non-ignored files detected:"
+            echo "The following files triggered the version bump requirement:"
             echo "$relevant_files"
             
             # Extract old and new versions
