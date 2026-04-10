@@ -1,0 +1,27 @@
+name: VirusTotal Release Scan
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required so VirusTotal can edit the release body
+    steps:
+      - name: Download Release Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download ${{ github.event.release.tag_name }} --repo ${{ github.repository }}
+
+      - name: VirusTotal Scan
+        uses: crazy-max/ghaction-virustotal@v5
+        with:
+          vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          update_release_body: true
+          files: |
+            *.exe
+            *.zip

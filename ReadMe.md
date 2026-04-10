@@ -2,12 +2,21 @@
 
 ### Status
 
+#### Release
+
+**Latest Release:** 
+[![GitHub Release](https://img.shields.io/github/v/release/Nomi/CsProfAnalyzer?style=flat-square)](https://github.com/Nomi/CsProfAnalyzer/releases/latest) | **VirusTotal Scans** | [![VirusTotal Scans](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml) |
+
+| Action | Status |
+| :--- | :--- |
+| **VirusTotal Scans** | [![VirusTotal Scans](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-release.yml/badge.svg)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-release.yml) |
+
 #### Production (master)
 
 | Action | Status |
 | :--- | :--- |
 | **Build and Release** | [![Build and Release](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/build-release.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/build-release.yml) |
-| **VirusTotal Scans** | [![VirusTotal Scans](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml) |
+| **VirusTotal Scans (Code)** | [![VirusTotal Scans](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml) |
 | **CI / Quality Check** | [![CI / Quality Check](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/code-quality.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/code-quality.yml) |
 
 #### Development (dev)
