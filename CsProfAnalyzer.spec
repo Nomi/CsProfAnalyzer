@@ -1,9 +1,20 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
-# Explicitly collect everything required
-hidden = collect_submodules('pandas') + collect_submodules('numpy') + ['colorama', 'tqdm']
-datas = collect_data_files('colorama') + [('core/locale', 'core/locale'), ('config.json', '.')]
+def get_requirements():
+    try:
+        with open('requirements.txt', 'r') as f:
+            return [line.strip().split('==')[0] for line in f if line.strip() and not line.startswith('#')]
+    except FileNotFoundError:
+        return []
+
+reqs = get_requirements()
+hidden = []
+datas = [('core/locale', 'core/locale'), ('config.json', '.')]
+
+for r in reqs:
+    hidden += collect_submodules(r)
+    datas += collect_data_files(r)
 
 a = Analysis(
     ['cs_prof_analyzer.py'],
