@@ -55,7 +55,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
-    environment: main
+    environment: Production
     steps:
       - uses: actions/checkout@v4
         with:
