@@ -1,40 +1,52 @@
 name: VirusTotal Release Scan
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: 'The release tag to scan (e.g., v0.1.9)'
-        required: true
-        default: 'latest'
+  workflow_run:
+    workflows: ["Build and Release"] # Must exactly match the 'name' in build-release.yml
+    types:
+      - completed
 
 jobs:
   scan:
+    # Only run the scan if the build pipeline was actually successful
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - name: Get Latest Release Tag
+        id: get_tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Asks GitHub for the name of the most recently published release
+        run: |
+          TAG=$(gh release view --repo ${{ github.repository }} --json tagName -q .tagName)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
       - name: Download Release Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Uses the release tag if triggered by a release, otherwise uses the manual input
-          TAG_TO_SCAN="${{ github.event.release.tag_name || github.event.inputs.tag_name }}"
-          
-          if [ "$TAG_TO_SCAN" == "latest" ]; then
-            gh release download --repo ${{ github.repository }}
-          else
-            gh release download $TAG_TO_SCAN --repo ${{ github.repository }}
-          fi
+          gh release download ${{ steps.get_tag.outputs.tag }} --repo ${{ github.repository }}
 
       - name: VirusTotal Scan
+        id: vt_scan
         uses: crazy-max/ghaction-virustotal@v5
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          update_release_body: true
+          update_release_body: false # Disabled because we are no longer in a 'release' event context
           files: |
             *.exe
             *.zip
+
+      - name: Append Scan to Release
+        uses: softprops/action-gh-release@v2
+        if: steps.vt_scan.outputs.analysis != ''
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          append_body: true
+          body: |
+            
+            ### 🛡️ VirusTotal Scan Results
+            ${{ steps.vt_scan.outputs.analysis }}
