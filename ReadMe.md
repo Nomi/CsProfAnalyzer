@@ -5,11 +5,11 @@
 #### Release
 
 **Latest Release:** 
-[![GitHub Release](https://img.shields.io/github/v/release/Nomi/CsProfAnalyzer?style=flat-square)](https://github.com/Nomi/CsProfAnalyzer/releases/latest) [![VirusTotal](https://img.shields.io/badge/VirusTotal-Scanned-brightgreen?logo=virustotal&style=flat-square)](https://github.com/Nomi/CsProfAnalyzer/releases/latest)
+[![GitHub Release](https://img.shields.io/github/v/release/Nomi/CsProfAnalyzer?style=flat-square)](https://github.com/Nomi/CsProfAnalyzer/releases/latest) | **VirusTotal Scans** | [![VirusTotal Scans](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml) |
 
 | Action | Status |
 | :--- | :--- |
-| **VirusTotal Scans** | [![VirusTotal Scans](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml/badge.svg?branch=master)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-code.yml) |
+| **VirusTotal Scans** | [![VirusTotal Scans](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-release.yml/badge.svg)](https://github.com/Nomi/CsProfAnalyzer/actions/workflows/scan-release.yml) |
 
 #### Production (master)
 
