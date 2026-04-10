@@ -11,7 +11,7 @@ updates:
       interval: "weekly"
     target-branch: "dev"
   - package-ecosystem: "pip"
-    directory: "/build/requirements"
+    directory: "/build_utils/requirements"
     schedule:
       interval: "weekly"
     target-branch: "dev"

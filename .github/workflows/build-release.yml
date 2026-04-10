@@ -63,10 +63,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r src/requirements.txt
-          pip install -r build/requirements/test.txt
+          pip install -r build_utils/requirements/test.txt
           pip install pyinstaller pyinstaller-hooks-contrib
       - name: Build executable
-        run: pyinstaller --clean build/CsProfAnalyzer.spec
+        run: pyinstaller --clean build_utils/CsProfAnalyzer.spec
       - name: Test executable
         run: ./dist/CsProfAnalyzer.exe --help
       - name: Create Source Archive
