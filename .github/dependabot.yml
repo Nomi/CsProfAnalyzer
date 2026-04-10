@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+
+# Just a reminder that security updates from dependabot will still go to the default branch (master/main),
+# which is actually a good safety feature from github's side.

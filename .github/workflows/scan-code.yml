@@ -4,17 +4,29 @@ on:
   push:
     branches:
       - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
 
 jobs:
   virustotal-code-scan:
     runs-on: ubuntu-latest
-    environment: main
     steps:
       - uses: actions/checkout@v4
+      - name: Get changed files
+        id: files
+        run: |
+          # Define files and directories that DON'T need a scan
+          BLOCKLIST_PATTERN='^(ReadMe\.md|\.gitignore|\.github\/.*|\.git.*|tests\/.*|requirements\.txt)$'
+          # Find all files, then exclude blocklisted files
+          changed_files=$(find . -type f | grep -vE "$BLOCKLIST_PATTERN" | sed 's|^\./||' | tr '\n' ' ')
+          echo "files=$changed_files" >> $GITHUB_OUTPUT
+
       - name: VirusTotal Scan
+        if: steps.files.outputs.files != ''
         uses: crazy-max/ghaction-virustotal@v5
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
-          files: |
-            cs_prof_analyzer.py
-            core/*.py
+          files: ${{ steps.files.outputs.files }}

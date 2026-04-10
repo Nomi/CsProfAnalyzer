@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - main
   workflow_dispatch:
     inputs:
       skip_validation:
@@ -54,7 +55,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
-    environment: main
+    environment: Production
     steps:
       - uses: actions/checkout@v4
         with:
