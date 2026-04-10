@@ -149,7 +149,10 @@ jobs:
       - name: Rename executable
         run: |
           mv dist/CsProfAnalyzer.exe dist/CsProfAnalyzer-win64-${{ steps.get_version.outputs.version }}.exe
-          mv dist/CsProfAnalyzer-script-*.zip dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
+          # Only rename if the source and destination are different to avoid errors
+          if [ ! -f "dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip" ]; then
+            mv dist/CsProfAnalyzer-script-*.zip dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
+          fi
       - name: VirusTotal Scan
         uses: crazy-max/ghaction-virustotal@v5
         with:
