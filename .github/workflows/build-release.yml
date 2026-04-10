@@ -43,7 +43,7 @@ jobs:
             if python build/ci_cd_utils.py old_version.py src/core/__version__.py; then
               echo "version_changed=true" >> $GITHUB_OUTPUT
             else
-              echo "Error: Version must be incremented."
+              echo "Error: src/core/__version__.py must be incremented."
               exit 1
             fi
           else
@@ -63,6 +63,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r src/requirements.txt
+          pip install -r build/requirements/test.txt
           pip install pyinstaller pyinstaller-hooks-contrib
       - name: Build executable
         run: pyinstaller --clean build/CsProfAnalyzer.spec
