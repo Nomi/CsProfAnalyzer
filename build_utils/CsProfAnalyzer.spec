@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath('../src'))
 # We only need to specify data files that are not automatically detected
 a = Analysis(
     ['../src/main.py'],
-    pathex=[],
+    pathex=['../'],
     binaries=[],
     datas=[('../src/locale', 'locale'), ('../src/config.json', '.')],
     hiddenimports=[],
