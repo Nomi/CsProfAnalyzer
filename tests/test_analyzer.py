@@ -4,12 +4,15 @@ import unittest
 import tempfile
 import os
 import json
+import hashlib
+import io
 from unittest.mock import patch, mock_open
+from contextlib import redirect_stdout
 from core.analyzer import CS2Analyzer
 from core.config import AppConfig
 
 
-class TestPerformanceAnalyzer(unittest.TestCase):
+class AnalyzerTestSuite(unittest.TestCase):
     """Test suite for performance analysis."""
 
     def setUp(self):
@@ -27,32 +30,39 @@ class TestPerformanceAnalyzer(unittest.TestCase):
         if os.path.exists(self.test_file.name):
             os.remove(self.test_file.name)
 
-    def test_dust2_metrics(self):
-        """Test accuracy of metrics calculation using known dust2 data."""
+    def test_analyzer_output_hash(self):
+        """Regression test: Ensure analyzer output matches known SHA256 hash."""
         from pathlib import Path
         dust2_path = Path(__file__).parent / "data" / "prof_de_dust2.csv"
         self.dust2_analyzer = CS2Analyzer(str(dust2_path))
         self.dust2_analyzer.load_data()
         
-        self.assertIsNotNone(self.dust2_analyzer.df)
-        self.assertGreater(len(self.dust2_analyzer.df), 1000)
+        # Capture stdout
+        f = io.StringIO()
+        with redirect_stdout(f):
+            self.dust2_analyzer.run_analysis()
+            self.dust2_analyzer.display_report()
+        output = f.getvalue()
         
-        from core.config import CFG
-        stutter_count = (self.dust2_analyzer.df[CFG.col_frame_ms] > CFG.stutter_threshold_ms).sum()
-        self.assertGreater(stutter_count, 1000)
+        # Hash the output
+        sha256_hash = hashlib.sha256(output.encode('utf-8')).hexdigest()
+        
+        # Known hash from previously verified output
+        known_hash = "04e7da828608575229ccfb068139466501261feea9639d21b5c9997d355ff319"
+        self.assertEqual(sha256_hash, known_hash)
 
-    def test_load_data(self):
+    def test_data_loading(self):
         """Test data loading functionality."""
         self.analyzer.load_data()
         self.assertIsNotNone(self.analyzer.df)
         self.assertEqual(len(self.analyzer.df), 2)
 
-    def test_basic_initialization(self):
+    def test_initialization_success(self):
         """Test that analyzer initializes with a valid path."""
         self.assertIsNotNone(self.analyzer)
         self.assertEqual(self.analyzer.file_path, self.test_file.name)
 
-    def test_config_loading(self):
+    def test_configuration_loading(self):
         """Test that configuration loads correctly."""
         mock_json = json.dumps({
             "STUTTER_THRESHOLD_MS": 20.0,
