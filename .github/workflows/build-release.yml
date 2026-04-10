@@ -69,7 +69,7 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller pyinstaller-hooks-contrib
       - name: Build executable
-        run: pyinstaller --onefile --name CsProfAnalyzer --add-data "core/locale;locale" --add-data "config.json;." cs_prof_analyzer.py
+        run: pyinstaller CsProfAnalyzer.spec
       - name: Test executable
         run: ./dist/CsProfAnalyzer.exe --help
       - name: VirusTotal Scan
