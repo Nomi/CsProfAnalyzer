@@ -171,3 +171,5 @@ jobs:
           files: |
             dist/CsProfAnalyzer-win64-${{ steps.get_version.outputs.version }}.exe
             dist/CsProfAnalyzer-script-${{ steps.get_version.outputs.version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
