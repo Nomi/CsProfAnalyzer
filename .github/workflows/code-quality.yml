@@ -15,10 +15,7 @@ jobs:
           fetch-depth: 0
       - name: Check version change
         run: |
-          # Identify the base branch (master or main)
           base_branch=$(git branch -r | grep -E 'origin/(master|main)$' | head -n 1)
-          
-          # Get files that changed compared to the base branch
           files=$(git diff --name-only $base_branch...HEAD)
           relevant_files=""
           for f in $files; do
@@ -31,12 +28,10 @@ jobs:
             echo "The following files triggered the version bump requirement:"
             echo "$relevant_files"
             
-            # Extract old and new versions
-            old_version=$(git show $base_branch:core/__version__.py | grep "__version__ =" | cut -d'"' -f2)
-            new_version=$(grep "__version__ =" core/__version__.py | cut -d'"' -f2)
-
-            if python .github/scripts/ci_cd_utils.py "$old_version" "$new_version"; then
-              echo "Version incremented successfully ($old_version -> $new_version)."
+            git show $base_branch:core/__version__.py > old_version.py
+            
+            if python .github/scripts/ci_cd_utils.py old_version.py core/__version__.py; then
+              echo "Version incremented successfully."
             else
               echo "Error: core/__version__.py must be incremented when changes occur to non-ignored files."
               exit 1
