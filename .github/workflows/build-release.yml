@@ -54,6 +54,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
+    environment: main
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,11 +64,21 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install dependencies
-        run: pip install pandas numpy tqdm colorama pyinstaller
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller pyinstaller-hooks-contrib
       - name: Build executable
         run: pyinstaller --onefile --name CsProfAnalyzer --add-data "core/locale;locale" --add-data "config.json;." cs_prof_analyzer.py
       - name: Test executable
         run: ./dist/CsProfAnalyzer.exe --help
+      - name: VirusTotal Scan
+        id: vt
+        uses: crazy-max/ghaction-virustotal@v5
+        with:
+          vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
+          update_release_body: true
+          files: |
+            dist/CsProfAnalyzer.exe
       - name: Get Version
         id: get_version
         shell: bash

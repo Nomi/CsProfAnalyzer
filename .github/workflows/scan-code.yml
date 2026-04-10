@@ -1,0 +1,20 @@
+name: Scan Code
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  virustotal-code-scan:
+    runs-on: ubuntu-latest
+    environment: main
+    steps:
+      - uses: actions/checkout@v4
+      - name: VirusTotal Scan
+        uses: crazy-max/ghaction-virustotal@v5
+        with:
+          vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
+          files: |
+            cs_prof_analyzer.py
+            core/*.py
